@@ -70,8 +70,8 @@ function renderCard(post, stage) {
     `;
   } else if (stage === 'proposal') {
     actions = `
-      <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'draft')">👍 採用する</button>
       <button class="btn btn-ng" onclick="remove('${post.id}', 'proposal')">👎 却下する</button>
+      <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'draft')">👍 採用する</button>
     `;
   } else if (stage === 'schedule') {
     actions = `
