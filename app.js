@@ -146,6 +146,13 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 });
 
+async function loadNextCron() {
+  const data = await api('GET', '/api/next-cron');
+  const el = document.getElementById('next-cron');
+  if (data.next) el.textContent = `⏰ 次回投稿: ${data.next}`;
+}
+
 // 初期表示
-loadStage('draft');
+loadStage('proposal');
 loadBadges();
+loadNextCron();

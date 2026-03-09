@@ -67,6 +67,22 @@ const server = http.createServer(async (req, res) => {
     return serveStatic(res, path.join(PUBLIC_DIR, file));
   }
 
+  // GET /api/next-cron — 次回cron実行時刻（JST）
+  if (method === 'GET' && pathname === '/api/next-cron') {
+    // 1日3回: JST 8:05 / 12:00 / 18:00
+    const slots = [{ h: 8, m: 5 }, { h: 12, m: 0 }, { h: 18, m: 0 }];
+    const now = new Date();
+    const jstOffset = 9 * 60;
+    const jstNow = new Date(now.getTime() + jstOffset * 60000);
+    const jstH = jstNow.getUTCHours(), jstM = jstNow.getUTCMinutes();
+    let next = null;
+    for (const s of slots) {
+      if (s.h > jstH || (s.h === jstH && s.m > jstM)) { next = s; break; }
+    }
+    if (!next) next = slots[0]; // 翌日の最初
+    return json(res, { next: `${String(next.h).padStart(2,'0')}:${String(next.m).padStart(2,'0')} JST` });
+  }
+
   // GET /api/:stage — 一覧取得
   if (method === 'GET' && pathname.match(/^\/api\/(\w+)$/)) {
     const stage = pathname.split('/')[2];
@@ -74,20 +90,7 @@ const server = http.createServer(async (req, res) => {
     return json(res, readStage(stage));
   }
 
-  // POST /api/:stage — 追加
-  if (method === 'POST' && pathname.match(/^\/api\/(\w+)$/)) {
-    const stage = pathname.split('/')[2];
-    if (!STAGES.includes(stage)) return json(res, { error: 'invalid stage' }, 400);
-    const body = await bodyJson(req).catch(() => null);
-    if (!body) return json(res, { error: 'invalid body' }, 400);
-    if (!body.id) body.id = `post_${Date.now()}`;
-    const data = readStage(stage);
-    data.posts.push(body);
-    writeStage(stage, data);
-    return json(res, { ok: true, id: body.id });
-  }
-
-  // POST /api/move — ステージ間移動
+  // POST /api/move — ステージ間移動（先に判定）
   if (method === 'POST' && pathname === '/api/move') {
     const body = await bodyJson(req).catch(() => null);
     if (!body) return json(res, { error: 'invalid body' }, 400);
@@ -102,6 +105,19 @@ const server = http.createServer(async (req, res) => {
     toData.posts.push(post);
     writeStage(to, toData);
     return json(res, { ok: true });
+  }
+
+  // POST /api/:stage — 追加
+  if (method === 'POST' && pathname.match(/^\/api\/(\w+)$/)) {
+    const stage = pathname.split('/')[2];
+    if (!STAGES.includes(stage)) return json(res, { error: 'invalid stage' }, 400);
+    const body = await bodyJson(req).catch(() => null);
+    if (!body) return json(res, { error: 'invalid body' }, 400);
+    if (!body.id) body.id = `post_${Date.now()}`;
+    const data = readStage(stage);
+    data.posts.push(body);
+    writeStage(stage, data);
+    return json(res, { ok: true, id: body.id });
   }
 
   // DELETE /api/:stage/:id — 削除
