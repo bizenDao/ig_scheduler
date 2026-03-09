@@ -70,18 +70,16 @@ def main():
         tg_send(tg_token, MASTER, f'❌ 投稿失敗！\nID: {post_id}\n{output[:200]}')
         sys.exit(1)
 
-    # posted.jsonに移動
-    requests.post(f'{API_BASE}/api/move',
-                  json={'id': post_id, 'from': 'schedule', 'to': 'posted'})
-
-    # posted_at追記
-    posted = json.load(open('/home/ec2-user/projects/ig_scheduler/data/posted.json'))
+    # schedule → posted に直接移動
     jst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-    for p in posted['posts']:
-        if p['id'] == post_id:
-            p['posted_at'] = jst.strftime('%Y-%m-%d %H:%M JST')
-    json.dump(posted, open('/home/ec2-user/projects/ig_scheduler/data/posted.json','w'),
-              ensure_ascii=False, indent=2)
+    post['posted_at'] = jst.strftime('%Y-%m-%d %H:%M JST')
+    data['posts'].pop(0)
+    json.dump(data, open(str(SCHEDULE),'w'), ensure_ascii=False, indent=2)
+    posted_file = SCHEDULE.parent / 'posted.json'
+    posted = json.load(open(posted_file))
+    posted['posts'].append(post)
+    json.dump(posted, open(str(posted_file),'w'), ensure_ascii=False, indent=2)
+    log(f'posted.jsonに移動完了: {post_id}')
 
     msg = f'✅ Instagram投稿しました！\nID: {post_id}\n投稿日時: {jst.strftime("%Y-%m-%d %H:%M JST")}\n画像: {len(images)}枚'
     tg_send(tg_token, MASTER, msg)
