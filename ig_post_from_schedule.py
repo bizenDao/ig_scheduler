@@ -63,6 +63,10 @@ def main():
 
     if result.returncode != 0:
         log('投稿失敗！中断します。')
+        # コピーした一時ファイルをクリーンアップ
+        for p in new_images:
+            try: Path(p).unlink()
+            except: pass
         tg_send(tg_token, MASTER, f'❌ 投稿失敗！\nID: {post_id}\n{output[:200]}')
         sys.exit(1)
 

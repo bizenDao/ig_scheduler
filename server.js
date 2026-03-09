@@ -6,10 +6,9 @@ const { exec } = require('child_process');
 const UPLOAD_DIR = '/home/ec2-user/projects/bizeny/images/ig_hosting';
 
 // Basic認証（.envから読み込み）
-const fs2 = require('fs');
 let AUTH_USER = 'akiko', AUTH_PASS = '';
 try {
-  const env = fs2.readFileSync(require('path').join(__dirname, '.env'), 'utf8');
+  const env = fs.readFileSync(require('path').join(__dirname, '.env'), 'utf8');
   env.split('\n').forEach(line => {
     const [k, v] = line.split('=');
     if (k && v) {
@@ -20,7 +19,7 @@ try {
 } catch {}
 
 function checkAuth(req) {
-  if (!AUTH_PASS) return true; // パスワード未設定なら素通り
+  if (!AUTH_PASS) return false; // .env未設定は拒否
   const authHeader = req.headers['authorization'] || '';
   if (!authHeader.startsWith('Basic ')) return false;
   const [user, pass] = Buffer.from(authHeader.slice(6), 'base64').toString().split(':');
