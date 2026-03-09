@@ -28,7 +28,7 @@ def tg_send(token, chat_id, text):
         log(f'Telegram送信エラー: {e}')
 
 def count_by_type(stage):
-    """指定ステージのJSONをtypeごとに集計"""
+    """指定ステージのJSONをtypeフィールドで集計"""
     try:
         posts = json.load(open(DATA_DIR / f'{stage}.json'))['posts']
     except:
@@ -36,14 +36,10 @@ def count_by_type(stage):
     counts = {t: 0 for t in TYPES}
     counts['other'] = 0
     for p in posts:
-        pid = p.get('id', '')
-        matched = False
-        for prefix in TYPES:
-            if pid.startswith(prefix):
-                counts[prefix] += 1
-                matched = True
-                break
-        if not matched:
+        t = p.get('type', '')
+        if t in counts:
+            counts[t] += 1
+        else:
             counts['other'] += 1
     return counts
 
