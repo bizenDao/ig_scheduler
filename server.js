@@ -83,8 +83,9 @@ const server = http.createServer(async (req, res) => {
   const pathname = parsed.pathname;
   const method = req.method;
 
-  // Basic認証チェック
-  if (!checkAuth(req)) {
+  // Basic認証チェック（localhostは除外）
+  const isLocal = req.socket.remoteAddress === '127.0.0.1' || req.socket.remoteAddress === '::1';
+  if (!isLocal && !checkAuth(req)) {
     res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="ig_scheduler"', 'Content-Type': 'text/plain' });
     return res.end('Unauthorized');
   }
