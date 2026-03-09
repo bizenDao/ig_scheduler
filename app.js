@@ -274,10 +274,10 @@ async function showSkillList() {
   document.getElementById('skill-list').style.display = 'block';
   document.getElementById('skill-detail').style.display = 'none';
   const skills = await api('GET', '/api/skills');
-  const labels = { '4koma': '🎨 4コマ漫画', 'bizenlife': '🍽 備前焼のある食卓', 'friends_episode': '👭 友達エピソード', 'nanobanana': '🖼 画像生成' };
+  const icons = { '4koma': '🎨', 'bizenlife': '🍽', 'akiko_diary': '📔', 'nanobanana': '🖼' };
   document.getElementById('skill-list').innerHTML = skills.map(s =>
     `<div class="skill-item" onclick="showSkillDetail('${s.name}')">
-      ${labels[s.name] || '📄 ' + s.name} <span>›</span>
+      ${icons[s.name] || '📄'} ${s.title || s.name} <span>›</span>
     </div>`
   ).join('');
 }

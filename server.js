@@ -109,7 +109,12 @@ const server = http.createServer(async (req, res) => {
     const dirs = fs.readdirSync(SKILLS_DIR).filter(d => {
       return fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
     });
-    return json(res, dirs.map(d => ({ name: d })));
+    return json(res, dirs.map(d => {
+      const mdPath = path.join(SKILLS_DIR, d, 'SKILL.md');
+      const firstLine = fs.readFileSync(mdPath, 'utf8').split('\n')[0];
+      const title = firstLine.replace(/^#\s*SKILL:\s*/, '').trim();
+      return { name: d, title };
+    }));
   }
 
   // GET /api/skills/:name — SKILL.md内容
