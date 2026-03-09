@@ -48,7 +48,7 @@ function renderCard(post, stage) {
   const imgs = (post.images || []);
   const imgHtml = imgs.length > 0
     ? `<div class="card-images ${imgs.length === 1 ? 'single' : ''}">
-        ${imgs.map(src => `<img src="${src}" loading="lazy" onerror="this.style.display='none'">`).join('')}
+        ${imgs.map(src => `<img src="${BASE}/api/img?path=${encodeURIComponent(src)}" loading="lazy" onerror="this.style.display='none'">`).join('')}
        </div>`
     : '';
 

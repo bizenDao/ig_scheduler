@@ -67,6 +67,22 @@ const server = http.createServer(async (req, res) => {
     return serveStatic(res, path.join(PUBLIC_DIR, file));
   }
 
+  // GET /api/img?path=... — ローカル画像を配信（許可ディレクトリのみ）
+  if (method === 'GET' && pathname === '/api/img') {
+    const imgPath = parsed.query.path || '';
+    const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/projects/ig_scheduler'];
+    if (!allowed.some(d => imgPath.startsWith(d))) return json(res, { error: 'forbidden' }, 403);
+    const ext = path.extname(imgPath).toLowerCase();
+    const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif' };
+    try {
+      const img = fs.readFileSync(imgPath);
+      res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
+      return res.end(img);
+    } catch {
+      res.writeHead(404); return res.end('Not found');
+    }
+  }
+
   // GET /api/next-cron — 次回cron実行時刻（JST）
   if (method === 'GET' && pathname === '/api/next-cron') {
     // 1日3回: JST 8:05 / 12:00 / 18:00
