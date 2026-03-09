@@ -44,11 +44,16 @@ function json(res, data, status = 200) {
   res.end(JSON.stringify(data));
 }
 
-function bodyJson(req) {
+function bodyJson(req, maxBytes = 20 * 1024 * 1024) { // 最大20MB（画像base64考慮）
   return new Promise((resolve, reject) => {
-    let body = '';
-    req.on('data', d => body += d);
-    req.on('end', () => { try { resolve(JSON.parse(body)); } catch { reject(); } });
+    const chunks = [];
+    let size = 0;
+    req.on('data', d => {
+      size += d.length;
+      if (size > maxBytes) { req.destroy(); return reject(new Error('too large')); }
+      chunks.push(d);
+    });
+    req.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString())); } catch { reject(); } });
   });
 }
 
@@ -120,16 +125,20 @@ const server = http.createServer(async (req, res) => {
     return json(res, { ok: true });
   }
 
-  // POST /api/upload — 画像アップロード（base64 JSON）
+  // POST /api/upload?filename=xxx.jpg — 生バイナリアップロード
   if (method === 'POST' && pathname === '/api/upload') {
-    const body = await bodyJson(req).catch(() => null);
-    if (!body || !body.data || !body.filename) return json(res, { error: 'invalid body' }, 400);
-    const ext = path.extname(body.filename).toLowerCase() || '.jpg';
+    const filename = parsed.query.filename || 'image.jpg';
+    const ext = path.extname(filename).toLowerCase() || '.jpg';
     const fname = `ig_${Date.now()}${ext}`;
     const fpath = path.join(UPLOAD_DIR, fname);
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-    fs.writeFileSync(fpath, Buffer.from(body.data, 'base64'));
-    return json(res, { ok: true, path: fpath });
+    const chunks = [];
+    req.on('data', c => chunks.push(c));
+    req.on('end', () => {
+      fs.writeFileSync(fpath, Buffer.concat(chunks));
+      json(res, { ok: true, path: fpath });
+    });
+    return;
   }
 
   // POST /api/reorder — schedule内の並び替え

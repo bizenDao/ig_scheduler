@@ -179,18 +179,22 @@ async function onFileSelected(postId, input) {
   const file = input.files[0];
   if (!file) return;
   toast('アップロード中…');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result.split(',')[1];
-    const res = await api('POST', '/api/upload', { filename: file.name, data: base64 });
-    if (res.path) {
-      addThumb(postId, res.path);
+  try {
+    const res = await fetch(`${BASE}/api/upload?filename=${encodeURIComponent(file.name)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'image/jpeg' },
+      body: file
+    });
+    const data = await res.json();
+    if (data.path) {
+      addThumb(postId, data.path);
       toast('アップロード完了！');
     } else {
       toast('アップロード失敗…');
     }
-  };
-  reader.readAsDataURL(file);
+  } catch(e) {
+    toast('アップロード失敗…');
+  }
   input.value = '';
 }
 

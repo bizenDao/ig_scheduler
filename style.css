@@ -306,3 +306,9 @@ header .sub { color: var(--muted); font-size: .8rem; }
   filter: none !important;
 }
 .del-thumb-btn:disabled { background: #555 !important; opacity: 0.4 !important; cursor: not-allowed !important; }
+
+/* 削除ボタン位置上書き（内側に） */
+.del-thumb-btn {
+  top: 4px !important; right: 4px !important;
+  left: auto !important;
+}
