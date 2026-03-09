@@ -295,7 +295,7 @@ header .sub { color: var(--muted); font-size: .8rem; }
 /* 削除ボタン上書き（赤丸・右上） */
 .del-thumb-btn {
   position: absolute !important;
-  top: -6px !important; left: auto !important; right: -6px !important;
+  top: 4px !important; left: auto !important; right: 4px !important;
   width: 22px; height: 22px;
   background: #e53935 !important; border-radius: 50% !important;
   border: 2px solid #fff !important; cursor: pointer !important;

@@ -125,20 +125,30 @@ const server = http.createServer(async (req, res) => {
     return json(res, { ok: true });
   }
 
-  // POST /api/upload?filename=xxx.jpg — 生バイナリアップロード
+  // POST /api/upload — 画像アップロード（base64 JSON + MIMEチェック）
   if (method === 'POST' && pathname === '/api/upload') {
-    const filename = parsed.query.filename || 'image.jpg';
-    const ext = path.extname(filename).toLowerCase() || '.jpg';
+    const body = await bodyJson(req, 30 * 1024 * 1024).catch(e => { console.error('upload error:', e); return null; });
+    if (!body || !body.data) return json(res, { error: 'invalid body' }, 400);
+
+    // MIMEチェック（base64データURLから判定）
+    const ALLOWED = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+    const mimeMatch = body.data.match(/^data:(image\/[a-z]+);base64,/);
+    if (!mimeMatch || !ALLOWED[mimeMatch[1]]) return json(res, { error: 'invalid mime type' }, 400);
+    const mimeType = mimeMatch[1];
+
+    // base64デコード
+    const base64Data = body.data.replace(/^data:image\/[a-z]+;base64,/, '');
+    const buf = Buffer.from(base64Data, 'base64');
+    if (buf.length > 10 * 1024 * 1024) return json(res, { error: 'file too large (max 10MB)' }, 400);
+
+    // ファイル名はサーバーが生成（パストラバーサル対策）
+    const ext = ALLOWED[mimeType];
     const fname = `ig_${Date.now()}${ext}`;
     const fpath = path.join(UPLOAD_DIR, fname);
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-    const chunks = [];
-    req.on('data', c => chunks.push(c));
-    req.on('end', () => {
-      fs.writeFileSync(fpath, Buffer.concat(chunks));
-      json(res, { ok: true, path: fpath });
-    });
-    return;
+    fs.writeFileSync(fpath, buf);
+    console.log(`upload ok: ${fpath} (${buf.length} bytes)`);
+    return json(res, { ok: true, path: fpath });
   }
 
   // POST /api/reorder — schedule内の並び替え
