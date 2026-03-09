@@ -263,3 +263,36 @@ async function loadNextCron() {
 loadStage('proposal');
 loadBadges();
 loadNextCron();
+
+// ── スキル一覧 ──────────────────────────────
+async function openSkills() {
+  document.getElementById('skill-modal').style.display = 'flex';
+  showSkillList();
+}
+
+async function showSkillList() {
+  document.getElementById('skill-list').style.display = 'block';
+  document.getElementById('skill-detail').style.display = 'none';
+  const skills = await api('GET', '/api/skills');
+  const labels = { '4koma': '🎨 4コマ漫画', 'bizenlife': '🍽 備前焼のある食卓', 'friends_episode': '👭 友達エピソード', 'nanobanana': '🖼 画像生成' };
+  document.getElementById('skill-list').innerHTML = skills.map(s =>
+    `<div class="skill-item" onclick="showSkillDetail('${s.name}')">
+      ${labels[s.name] || '📄 ' + s.name} <span>›</span>
+    </div>`
+  ).join('');
+}
+
+async function showSkillDetail(name) {
+  document.getElementById('skill-list').style.display = 'none';
+  document.getElementById('skill-detail').style.display = 'block';
+  const data = await api('GET', `/api/skills/${name}`);
+  document.getElementById('skill-md').innerHTML = marked.parse(data.content);
+}
+
+function closeSkillModal() {
+  document.getElementById('skill-modal').style.display = 'none';
+}
+
+function closeSkills(e) {
+  if (e.target.id === 'skill-modal') closeSkillModal();
+}

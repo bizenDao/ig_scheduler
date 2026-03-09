@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IG Scheduler — @bizenyakiko</title>
   <link rel="stylesheet" href="style.css?v=1773046751">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <header>
@@ -12,7 +13,23 @@
       <h1>📸 IG Scheduler</h1>
       <div class="sub">@bizenyakiko</div>
     </div>
-  </header>
+    <button class="skill-btn" onclick="openSkills()" title="スキル一覧">📖</button>
+</header>
+
+<!-- スキルモーダル -->
+<div id="skill-modal" class="modal-overlay" style="display:none" onclick="closeSkills(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>📖 スキル一覧</span>
+      <button onclick="closeSkillModal()">✕</button>
+    </div>
+    <div id="skill-list"></div>
+    <div id="skill-detail" style="display:none">
+      <button class="back-btn" onclick="showSkillList()">← 戻る</button>
+      <div id="skill-md"></div>
+    </div>
+  </div>
+</div>
 
   <div class="tabs">
     <button class="tab active" data-stage="proposal">提案<span class="badge" id="badge-proposal">0</span></button>

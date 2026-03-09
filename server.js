@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const { exec } = require('child_process');
+const SKILLS_DIR = '/home/ec2-user/workspace/skills';
 const UPLOAD_DIR = '/home/ec2-user/projects/bizeny/images/ig_hosting';
 
 // Basic認証（.envから読み込み）
@@ -103,6 +104,23 @@ const server = http.createServer(async (req, res) => {
   }
 
   // GET /api/img?path=... — ローカル画像を配信（許可ディレクトリのみ）
+  // GET /api/skills — スキル一覧
+  if (method === 'GET' && pathname === '/api/skills') {
+    const dirs = fs.readdirSync(SKILLS_DIR).filter(d => {
+      return fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
+    });
+    return json(res, dirs.map(d => ({ name: d })));
+  }
+
+  // GET /api/skills/:name — SKILL.md内容
+  if (method === 'GET' && pathname.match(/^\/api\/skills\/.+$/)) {
+    const name = pathname.split('/')[3];
+    const mdPath = path.join(SKILLS_DIR, name, 'SKILL.md');
+    if (!fs.existsSync(mdPath)) return json(res, { error: 'not found' }, 404);
+    const md = fs.readFileSync(mdPath, 'utf8');
+    return json(res, { name, content: md });
+  }
+
   if (method === 'GET' && pathname === '/api/img') {
     const imgPath = parsed.query.path || '';
     const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/projects/ig_scheduler', '/home/ec2-user/projects/bizeny/images/ig_hosting'];
