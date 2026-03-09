@@ -68,9 +68,8 @@ function renderCard(post, stage) {
     `;
   } else if (stage === 'proposal') {
     actions = `
-      <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'schedule')">✅ OK</button>
-      <button class="btn btn-mod" onclick="openModal('${post.id}')">✏️ 修正</button>
-      <button class="btn btn-ng" onclick="remove('${post.id}', 'proposal')">🗑 NG</button>
+      <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'draft')">👍 採用する</button>
+      <button class="btn btn-ng" onclick="remove('${post.id}', 'proposal')">👎 却下する</button>
     `;
   } else if (stage === 'schedule') {
     actions = `
