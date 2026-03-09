@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { exec } = require('child_process');
 
 const PORT = 8801;
 const DATA_DIR = path.join(__dirname, 'data');
@@ -145,6 +146,18 @@ const server = http.createServer(async (req, res) => {
     data.posts = data.posts.filter(p => p.id !== id);
     if (data.posts.length === before) return json(res, { error: 'not found' }, 404);
     writeStage(stage, data);
+    return json(res, { ok: true });
+  }
+
+  // POST /api/request_mod — 修正依頼を彰子にsystem eventで転送
+  if (method === 'POST' && pathname === '/api/request_mod') {
+    const body = await bodyJson(req).catch(() => null);
+    if (!body) return json(res, { error: 'invalid body' }, 400);
+    const { id, message } = body;
+    const text = `【ig_scheduler 修正依頼】投稿ID: ${id} の修正依頼が届きました。\n\n修正内容:\n${message}\n\ndraft.jsonの該当投稿を修正して、ひのちゃん(7107850192)にTelegramで「修正しました！確認お願いします🙏」と報告してください。`;
+    exec(`openclaw system event --text ${JSON.stringify(text)} --mode now`, (err) => {
+      if (err) console.error('system event error:', err);
+    });
     return json(res, { ok: true });
   }
 
