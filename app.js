@@ -84,7 +84,6 @@ function renderCard(post, stage) {
       </div>
       <button class="btn btn-move" onclick="move('${post.id}', 'schedule', 'draft')">↩️ 下書きに戻す</button>
       <button class="btn btn-del" onclick="remove('${post.id}', 'schedule')">🗑 取り消し</button>
-      ${editBtn}
     `;
   } else if (stage === 'posted') {
     const meta = post.posted_at ? `<div class="posted-meta">投稿日時: ${post.posted_at}</div>` : '';
