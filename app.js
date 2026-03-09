@@ -123,8 +123,8 @@ function startEdit(id, stage) {
       <div class="edit-img-grid" id="edit-imgs-${id}"></div>
       <input type="file" id="file-input-${id}" accept="image/*" style="display:none" onchange="onFileSelected('${id}', this)">
       <div class="edit-actions">
-        <button class="btn btn-ok" onclick="saveEdit('${id}', '${stage}')">💾 保存</button>
         <button class="btn btn-cancel" onclick="loadStage('${stage}')">❌ キャンセル</button>
+        <button class="btn btn-ok" onclick="saveEdit('${id}', '${stage}')">💾 保存</button>
       </div>
     </div>
   `;
