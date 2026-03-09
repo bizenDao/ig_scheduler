@@ -1,3 +1,12 @@
 {
-  "posts": []
+  "posts": [
+    {
+      "id": "sample_posted_20260309",
+      "images": [
+        "/home/ec2-user/workspace/HR/charsheets/akiko_bizeny/corporate.jpg"
+      ],
+      "caption": "今日は工房の先生に、釉薬の調合を教えてもらいました！\n\n備前焼は基本的に無釉なのですが、近年は新しい表現も増えているそう。\nフランス人の私には、この「余白」の美学がまだまだ奥深くて…\n\nでも、だから面白い！Magnifique! ✨\n\n#備前焼 #陶芸留学 #備前市 #BizenyAkiko",
+      "posted_at": "2026-03-09 17:00 JST"
+    }
+  ]
 }

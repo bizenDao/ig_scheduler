@@ -64,9 +64,9 @@ function renderCard(post, stage) {
   let actions = '';
   if (stage === 'draft') {
     actions = `
-      <button class="btn btn-ok" onclick="move('${post.id}', 'draft', 'schedule')">✅ OK</button>
-      <button class="btn btn-ng" onclick="remove('${post.id}', 'draft')">🗑 NG</button>
       ${editBtn}
+      <button class="btn btn-ok" onclick="move('${post.id}', 'draft', 'schedule')">📅 予定に追加</button>
+      <button class="btn btn-del" onclick="remove('${post.id}', 'draft')">🗑 削除</button>
     `;
   } else if (stage === 'proposal') {
     actions = `
