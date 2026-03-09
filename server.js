@@ -5,6 +5,28 @@ const url = require('url');
 const { exec } = require('child_process');
 const UPLOAD_DIR = '/home/ec2-user/projects/bizeny/images/ig_hosting';
 
+// Basic認証（.envから読み込み）
+const fs2 = require('fs');
+let AUTH_USER = 'akiko', AUTH_PASS = '';
+try {
+  const env = fs2.readFileSync(require('path').join(__dirname, '.env'), 'utf8');
+  env.split('\n').forEach(line => {
+    const [k, v] = line.split('=');
+    if (k && v) {
+      if (k.trim() === 'USER') AUTH_USER = v.trim();
+      if (k.trim() === 'PASSWORD') AUTH_PASS = v.trim();
+    }
+  });
+} catch {}
+
+function checkAuth(req) {
+  if (!AUTH_PASS) return true; // パスワード未設定なら素通り
+  const authHeader = req.headers['authorization'] || '';
+  if (!authHeader.startsWith('Basic ')) return false;
+  const [user, pass] = Buffer.from(authHeader.slice(6), 'base64').toString().split(':');
+  return user === AUTH_USER && pass === AUTH_PASS;
+}
+
 const PORT = 8801;
 const DATA_DIR = path.join(__dirname, 'data');
 const PUBLIC_DIR = __dirname;
@@ -61,6 +83,12 @@ const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url, true);
   const pathname = parsed.pathname;
   const method = req.method;
+
+  // Basic認証チェック
+  if (!checkAuth(req)) {
+    res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="ig_scheduler"', 'Content-Type': 'text/plain' });
+    return res.end('Unauthorized');
+  }
 
   // CORS preflight
   if (method === 'OPTIONS') {
