@@ -1,4 +1,5 @@
-const API = '';  // same origin
+// /ig_scheduler/ 配下で動くようにベースパスを動的取得
+const BASE = window.location.pathname.replace(/\/[^\/]*$/, '').replace(/\/$/, '');
 let currentStage = 'draft';
 let pendingModId = null;
 
@@ -7,7 +8,7 @@ const STAGE_LABELS = { draft: '下書き', proposal: '確認中', schedule: '承
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API + path, opts);
+  const res = await fetch(BASE + path, opts);
   return res.json();
 }
 
