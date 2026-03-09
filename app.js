@@ -179,22 +179,22 @@ async function onFileSelected(postId, input) {
   const file = input.files[0];
   if (!file) return;
   toast('アップロード中…');
-  try {
-    const res = await fetch(`${BASE}/api/upload?filename=${encodeURIComponent(file.name)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': file.type || 'image/jpeg' },
-      body: file
-    });
-    const data = await res.json();
-    if (data.path) {
-      addThumb(postId, data.path);
-      toast('アップロード完了！');
-    } else {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const dataUrl = e.target.result; // data:image/jpeg;base64,... 全体を送る
+      const res = await api('POST', '/api/upload', { filename: file.name, data: dataUrl });
+      if (res.path) {
+        addThumb(postId, res.path);
+        toast('アップロード完了！');
+      } else {
+        toast('アップロード失敗: ' + (res.error || '不明'));
+      }
+    } catch(e) {
       toast('アップロード失敗…');
     }
-  } catch(e) {
-    toast('アップロード失敗…');
-  }
+  };
+  reader.readAsDataURL(file);
   input.value = '';
 }
 
