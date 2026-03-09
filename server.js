@@ -77,7 +77,7 @@ const server = http.createServer(async (req, res) => {
   // GET /api/img?path=... — ローカル画像を配信（許可ディレクトリのみ）
   if (method === 'GET' && pathname === '/api/img') {
     const imgPath = parsed.query.path || '';
-    const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/projects/ig_scheduler'];
+    const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/projects/ig_scheduler', '/home/ec2-user/projects/bizeny/images/ig_hosting'];
     if (!allowed.some(d => imgPath.startsWith(d))) return json(res, { error: 'forbidden' }, 403);
     const ext = path.extname(imgPath).toLowerCase();
     const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif' };
