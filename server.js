@@ -107,6 +107,18 @@ const server = http.createServer(async (req, res) => {
     return json(res, readStage(stage));
   }
 
+  // POST /api/request_mod — 修正依頼を彰子にsystem eventで転送
+  if (method === 'POST' && pathname === '/api/request_mod') {
+    const body = await bodyJson(req).catch(() => null);
+    if (!body) return json(res, { error: 'invalid body' }, 400);
+    const { id, message } = body;
+    const text = `【ig_scheduler 修正依頼】投稿ID: ${id} の修正依頼が届きました。\n\n修正内容:\n${message}\n\ndraft.jsonの該当投稿を修正して、ひのちゃん(7107850192)にTelegramで「修正しました！確認お願いします🙏」と報告してください。`;
+    exec(`openclaw system event --text ${JSON.stringify(text)} --mode now`, (err) => {
+      if (err) console.error('system event error:', err);
+    });
+    return json(res, { ok: true });
+  }
+
   // POST /api/move — ステージ間移動（先に判定）
   if (method === 'POST' && pathname === '/api/move') {
     const body = await bodyJson(req).catch(() => null);
