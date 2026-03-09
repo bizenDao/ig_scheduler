@@ -163,6 +163,7 @@ header .sub { color: var(--muted); font-size: .8rem; }
 .btn-ng { background: var(--ng); color: #fff; }
 .btn-mod { background: var(--mod); color: #fff; }
 .btn-move { background: var(--border); color: var(--text); }
+.btn-edit { background: #2a2a5a; color: #aaa; }
 .btn-del { background: transparent; color: var(--ng); border: 1px solid var(--ng); }
 
 .posted-meta { font-size: .72rem; color: var(--muted); margin-top: 6px; }

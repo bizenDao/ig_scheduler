@@ -58,16 +58,21 @@ function renderCard(post, stage) {
     ${isLong ? `<button class="caption-toggle" onclick="toggleCaption('${post.id}')">もっと見る</button>` : ''}
   `;
 
+  const canEdit = stage !== 'posted';
+  const editBtn = canEdit ? `<button class="btn btn-edit" onclick="startEdit('${post.id}', '${stage}')">✏️ 編集</button>` : '';
+
   let actions = '';
   if (stage === 'draft') {
     actions = `
       <button class="btn btn-ok" onclick="move('${post.id}', 'draft', 'schedule')">✅ OK</button>
       <button class="btn btn-ng" onclick="remove('${post.id}', 'draft')">🗑 NG</button>
+      ${editBtn}
     `;
   } else if (stage === 'proposal') {
     actions = `
       <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'draft')">👍 採用する</button>
       <button class="btn btn-ng" onclick="remove('${post.id}', 'proposal')">👎 却下する</button>
+      ${editBtn}
     `;
   } else if (stage === 'schedule') {
     actions = `
@@ -79,6 +84,7 @@ function renderCard(post, stage) {
       </div>
       <button class="btn btn-move" onclick="move('${post.id}', 'schedule', 'draft')">↩️ 下書きに戻す</button>
       <button class="btn btn-del" onclick="remove('${post.id}', 'schedule')">🗑 取り消し</button>
+      ${editBtn}
     `;
   } else if (stage === 'posted') {
     const meta = post.posted_at ? `<div class="posted-meta">投稿日時: ${post.posted_at}</div>` : '';
@@ -99,6 +105,41 @@ function renderCard(post, stage) {
       <div class="card-actions">${actions}</div>
     </div>
   `;
+}
+
+// 編集モード（インライン）
+function startEdit(id, stage) {
+  const card = document.getElementById(`card-${id}`);
+  const body = card.querySelector('.card-body');
+  const caption = card.querySelector(`#cap-${id}`).textContent;
+  const imgs = [...card.querySelectorAll('.card-images img')].map(img => {
+    const url = new URL(img.src);
+    return decodeURIComponent(url.searchParams.get('path') || '');
+  });
+
+  body.innerHTML = `
+    <div class="edit-mode">
+      <label>キャプション</label>
+      <textarea id="edit-cap-${id}" rows="6">${caption}</textarea>
+      <label>画像パス（1行1枚）</label>
+      <textarea id="edit-imgs-${id}" rows="${Math.max(2, imgs.length)}">${imgs.join('\n')}</textarea>
+      <div class="edit-actions">
+        <button class="btn btn-ok" onclick="saveEdit('${id}', '${stage}')">💾 保存</button>
+        <button class="btn btn-cancel" onclick="loadStage('${stage}')">❌ キャンセル</button>
+      </div>
+    </div>
+  `;
+}
+
+async function saveEdit(id, stage) {
+  const caption = document.getElementById(`edit-cap-${id}`).value;
+  const imgsRaw = document.getElementById(`edit-imgs-${id}`).value;
+  const images = imgsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const res = await api('PUT', `/api/${stage}/${id}`, { caption, images });
+  if (res.ok) {
+    toast('保存しました');
+    loadStage(stage);
+  }
 }
 
 function toggleCaption(id) {
@@ -133,11 +174,6 @@ async function remove(id, stage) {
 // タブ切り替え
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => loadStage(tab.dataset.stage));
-});
-
-// モーダル外クリックで閉じる
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
 });
 
 async function loadNextCron() {

@@ -154,6 +154,21 @@ const server = http.createServer(async (req, res) => {
     return json(res, { ok: true });
   }
 
+  // PUT /api/:stage/:id — キャプション・画像更新
+  if (method === 'PUT' && pathname.match(/^\/api\/(\w+)\/(.+)$/)) {
+    const [, , stage, id] = pathname.split('/');
+    if (!STAGES.includes(stage)) return json(res, { error: 'invalid stage' }, 400);
+    const body = await bodyJson(req).catch(() => null);
+    if (!body) return json(res, { error: 'invalid body' }, 400);
+    const data = readStage(stage);
+    const post = data.posts.find(p => p.id === id);
+    if (!post) return json(res, { error: 'not found' }, 404);
+    if (body.caption !== undefined) post.caption = body.caption;
+    if (body.images !== undefined) post.images = body.images;
+    writeStage(stage, data);
+    return json(res, { ok: true });
+  }
+
   // POST /api/:stage — 追加
   if (method === 'POST' && pathname.match(/^\/api\/(\w+)$/)) {
     const stage = pathname.split('/')[2];
