@@ -1,7 +1,6 @@
 // /ig_scheduler/ 配下で動くようにベースパスを動的取得
 const BASE = window.location.pathname.replace(/\/[^\/]*$/, '').replace(/\/$/, '');
 let currentStage = 'draft';
-let pendingModId = null;
 
 const STAGE_LABELS = { draft: '下書き', proposal: '確認中', schedule: '承認済み', posted: '投稿済み' };
 
@@ -63,7 +62,6 @@ function renderCard(post, stage) {
   if (stage === 'draft') {
     actions = `
       <button class="btn btn-ok" onclick="move('${post.id}', 'draft', 'schedule')">✅ OK</button>
-      <button class="btn btn-mod" onclick="openModal('${post.id}')">✏️ 修正</button>
       <button class="btn btn-ng" onclick="remove('${post.id}', 'draft')">🗑 NG</button>
     `;
   } else if (stage === 'proposal') {
@@ -115,26 +113,6 @@ async function remove(id, stage) {
     toast('削除しました');
     loadStage(stage);
   }
-}
-
-function openModal(id) {
-  pendingModId = id;
-  document.getElementById('modal-text').value = '';
-  document.getElementById('modal-overlay').classList.add('show');
-}
-
-function closeModal() {
-  pendingModId = null;
-  document.getElementById('modal-overlay').classList.remove('show');
-}
-
-async function submitMod() {
-  const text = document.getElementById('modal-text').value.trim();
-  if (!text) return;
-  // 修正依頼をTelegramに送る（サーバー経由）
-  await api('POST', '/api/request_mod', { id: pendingModId, message: text });
-  toast('修正依頼を送りました');
-  closeModal();
 }
 
 // タブ切り替え
