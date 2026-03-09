@@ -1,0 +1,214 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --border: #0f3460;
+  --accent: #e94560;
+  --text: #e0e0e0;
+  --muted: #888;
+  --ok: #2ecc71;
+  --ng: #e74c3c;
+  --mod: #f39c12;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+header .sub { color: var(--muted); font-size: .8rem; }
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 6px;
+  text-align: center;
+  font-size: .78rem;
+  color: var(--muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab .badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: .65rem;
+  border-radius: 10px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+.content { padding: 12px; }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 48px 16px;
+  font-size: .9rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.card-images {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: #000;
+  max-height: 200px;
+}
+.card-images::-webkit-scrollbar { display: none; }
+.card-images img {
+  height: 200px;
+  width: auto;
+  flex-shrink: 0;
+  object-fit: cover;
+  display: block;
+}
+.card-images.single img { width: 100%; object-fit: cover; }
+
+.card-body { padding: 12px; }
+
+.card-id { font-size: .72rem; color: var(--muted); margin-bottom: 6px; }
+
+.card-caption {
+  font-size: .88rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 80px;
+  overflow: hidden;
+  position: relative;
+}
+.card-caption.expanded { max-height: none; }
+.caption-toggle {
+  font-size: .75rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  padding: 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn {
+  flex: 1;
+  min-width: 70px;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 6px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.btn-ok { background: var(--ok); color: #fff; }
+.btn-ng { background: var(--ng); color: #fff; }
+.btn-mod { background: var(--mod); color: #fff; }
+.btn-move { background: var(--border); color: var(--text); }
+.btn-del { background: transparent; color: var(--ng); border: 1px solid var(--ng); }
+
+.posted-meta { font-size: .72rem; color: var(--muted); margin-top: 6px; }
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 100;
+  align-items: flex-end;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal h3 { font-size: 1rem; margin-bottom: 12px; }
+.modal textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 10px;
+  font-size: .9rem;
+  resize: vertical;
+  min-height: 80px;
+}
+.modal-actions { display: flex; gap: 8px; margin-top: 12px; }
+.modal-actions .btn { font-size: .85rem; padding: 10px; }
+.btn-cancel { background: var(--border); color: var(--text); }
+.btn-send { background: var(--accent); color: #fff; }
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: .85rem;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }

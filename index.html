@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IG Scheduler — @bizenyakiko</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>📸 IG Scheduler</h1>
+      <div class="sub">@bizenyakiko</div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-stage="draft">下書き<span class="badge" id="badge-draft">0</span></button>
+    <button class="tab" data-stage="proposal">確認中<span class="badge" id="badge-proposal">0</span></button>
+    <button class="tab" data-stage="schedule">承認済み<span class="badge" id="badge-schedule">0</span></button>
+    <button class="tab" data-stage="posted">投稿済み<span class="badge" id="badge-posted">0</span></button>
+  </div>
+
+  <div class="content" id="content"></div>
+
+  <!-- 修正依頼モーダル -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3>✏️ 修正依頼</h3>
+      <textarea id="modal-text" placeholder="修正してほしい内容を書いてください"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">キャンセル</button>
+        <button class="btn btn-send" onclick="submitMod()">送信</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
