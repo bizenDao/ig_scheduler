@@ -71,12 +71,22 @@ function renderCard(post, stage) {
     `;
   } else if (stage === 'schedule') {
     actions = `
+      <div class="reorder-btns">
+        <button class="btn btn-ord" onclick="reorder('${post.id}', 'first')">⏫ 先頭</button>
+        <button class="btn btn-ord" onclick="reorder('${post.id}', 'up')">🔼 上へ</button>
+        <button class="btn btn-ord" onclick="reorder('${post.id}', 'down')">🔽 下へ</button>
+        <button class="btn btn-ord" onclick="reorder('${post.id}', 'last')">⏬ 最後</button>
+      </div>
       <button class="btn btn-move" onclick="move('${post.id}', 'schedule', 'draft')">↩️ 下書きに戻す</button>
       <button class="btn btn-del" onclick="remove('${post.id}', 'schedule')">🗑 取り消し</button>
     `;
   } else if (stage === 'posted') {
     const meta = post.posted_at ? `<div class="posted-meta">投稿日時: ${post.posted_at}</div>` : '';
-    actions = `<div style="padding:4px 0">${meta}</div>`;
+    actions = `
+      <div style="padding:4px 0">${meta}</div>
+      <button class="btn btn-ok" onclick="move('${post.id}', 'posted', 'schedule')">🔁 再投稿</button>
+      <button class="btn btn-del" onclick="remove('${post.id}', 'posted')">🗑 削除</button>
+    `;
   }
 
   return `
@@ -96,6 +106,11 @@ function toggleCaption(id) {
   const btn = el.nextElementSibling;
   el.classList.toggle('expanded');
   btn.textContent = el.classList.contains('expanded') ? '閉じる' : 'もっと見る';
+}
+
+async function reorder(id, direction) {
+  await api('POST', '/api/reorder', { id, direction });
+  loadStage('schedule');
 }
 
 async function move(id, from, to) {

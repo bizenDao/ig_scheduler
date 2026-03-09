@@ -119,6 +119,24 @@ const server = http.createServer(async (req, res) => {
     return json(res, { ok: true });
   }
 
+  // POST /api/reorder — schedule内の並び替え
+  if (method === 'POST' && pathname === '/api/reorder') {
+    const body = await bodyJson(req).catch(() => null);
+    if (!body) return json(res, { error: 'invalid body' }, 400);
+    const { id, direction } = body; // direction: 'up' | 'down' | 'first' | 'last'
+    const data = readStage('schedule');
+    const idx = data.posts.findIndex(p => p.id === id);
+    if (idx === -1) return json(res, { error: 'not found' }, 404);
+    const [post] = data.posts.splice(idx, 1);
+    if (direction === 'first') data.posts.unshift(post);
+    else if (direction === 'last') data.posts.push(post);
+    else if (direction === 'up') data.posts.splice(Math.max(0, idx - 1), 0, post);
+    else if (direction === 'down') data.posts.splice(Math.min(data.posts.length, idx + 1), 0, post);
+    else data.posts.splice(idx, 0, post);
+    writeStage('schedule', data);
+    return json(res, { ok: true });
+  }
+
   // POST /api/move — ステージ間移動（先に判定）
   if (method === 'POST' && pathname === '/api/move') {
     const body = await bodyJson(req).catch(() => null);
@@ -158,18 +176,6 @@ const server = http.createServer(async (req, res) => {
     data.posts = data.posts.filter(p => p.id !== id);
     if (data.posts.length === before) return json(res, { error: 'not found' }, 404);
     writeStage(stage, data);
-    return json(res, { ok: true });
-  }
-
-  // POST /api/request_mod — 修正依頼を彰子にsystem eventで転送
-  if (method === 'POST' && pathname === '/api/request_mod') {
-    const body = await bodyJson(req).catch(() => null);
-    if (!body) return json(res, { error: 'invalid body' }, 400);
-    const { id, message } = body;
-    const text = `【ig_scheduler 修正依頼】投稿ID: ${id} の修正依頼が届きました。\n\n修正内容:\n${message}\n\ndraft.jsonの該当投稿を修正して、ひのちゃん(7107850192)にTelegramで「修正しました！確認お願いします🙏」と報告してください。`;
-    exec(`openclaw system event --text ${JSON.stringify(text)} --mode now`, (err) => {
-      if (err) console.error('system event error:', err);
-    });
     return json(res, { ok: true });
   }
 

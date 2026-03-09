@@ -217,3 +217,21 @@ header .sub { color: var(--muted); font-size: .8rem; }
   pointer-events: none;
 }
 .toast.show { opacity: 1; }
+
+/* 並び替えボタン */
+.reorder-btns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.btn-ord {
+  background: #2a2a4a;
+  color: #aaa;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex: 1;
+  min-width: 52px;
+}
+.btn-ord:hover { background: #3a3a6a; color: #fff; }
