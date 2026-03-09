@@ -223,6 +223,7 @@ const server = http.createServer(async (req, res) => {
     const data = readStage(stage);
     const post = data.posts.find(p => p.id === id);
     if (!post) return json(res, { error: 'not found' }, 404);
+    if (body.type !== undefined) post.type = body.type;
     if (body.caption !== undefined) post.caption = body.caption;
     if (body.images !== undefined) post.images = body.images;
     writeStage(stage, data);

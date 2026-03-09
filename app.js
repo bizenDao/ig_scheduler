@@ -117,6 +117,14 @@ function startEdit(id, stage) {
 
   body.innerHTML = `
     <div class="edit-mode" id="edit-${id}" data-stage="${stage}">
+      <label>タイプ</label>
+      <select id="edit-type-${id}" class="type-select">
+        <option value="">-- 選択 --</option>
+        <option value="4koma">4コマ漫画</option>
+        <option value="bizenlife">備前焼のある食卓</option>
+        <option value="friends">友人エピソード</option>
+        <option value="other">その他</option>
+      </select>
       <label>キャプション</label>
       <textarea id="edit-cap-${id}" rows="6">${caption}</textarea>
       <label>画像</label>
@@ -199,11 +207,12 @@ async function onFileSelected(postId, input) {
 }
 
 async function saveEdit(id, stage) {
+  const type = document.getElementById(`edit-type-${id}`).value;
   const caption = document.getElementById(`edit-cap-${id}`).value;
   const thumbs = document.querySelectorAll(`#edit-imgs-${id} .edit-thumb:not(.upload-btn-wrap)`);
   const images = [...thumbs].map(t => t.dataset.path).filter(Boolean);
   if (images.length === 0) { toast('画像は最低1枚必要です'); return; }
-  const res = await api('PUT', `/api/${stage}/${id}`, { caption, images });
+  const res = await api('PUT', `/api/${stage}/${id}`, { type, caption, images });
   if (res.ok) {
     toast('保存しました');
     loadStage(stage);
