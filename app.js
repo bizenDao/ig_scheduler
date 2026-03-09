@@ -72,7 +72,6 @@ function renderCard(post, stage) {
     actions = `
       <button class="btn btn-ok" onclick="move('${post.id}', 'proposal', 'draft')">👍 採用する</button>
       <button class="btn btn-ng" onclick="remove('${post.id}', 'proposal')">👎 却下する</button>
-      ${editBtn}
     `;
   } else if (stage === 'schedule') {
     actions = `
@@ -106,7 +105,7 @@ function renderCard(post, stage) {
   `;
 }
 
-// 編集モード（インライン）
+// 編集モード（インライン・下書きのみ）
 function startEdit(id, stage) {
   const card = document.getElementById(`card-${id}`);
   const body = card.querySelector('.card-body');
@@ -117,23 +116,61 @@ function startEdit(id, stage) {
   });
 
   body.innerHTML = `
-    <div class="edit-mode">
+    <div class="edit-mode" id="edit-${id}">
       <label>キャプション</label>
       <textarea id="edit-cap-${id}" rows="6">${caption}</textarea>
-      <label>画像パス（1行1枚）</label>
-      <textarea id="edit-imgs-${id}" rows="${Math.max(2, imgs.length)}">${imgs.join('\n')}</textarea>
+      <label>画像</label>
+      <div id="edit-imgs-${id}"></div>
+      <button class="btn btn-add-img" onclick="addImgField('${id}')">＋ 画像を追加</button>
       <div class="edit-actions">
         <button class="btn btn-ok" onclick="saveEdit('${id}', '${stage}')">💾 保存</button>
         <button class="btn btn-cancel" onclick="loadStage('${stage}')">❌ キャンセル</button>
       </div>
     </div>
   `;
+
+  // 画像フィールド初期化
+  const imgContainer = document.getElementById(`edit-imgs-${id}`);
+  imgs.forEach((p, i) => appendImgField(id, p, imgs.length));
+  // imgが空なら1行追加
+  if (imgs.length === 0) appendImgField(id, '', 0);
+}
+
+function appendImgField(postId, value, total) {
+  const container = document.getElementById(`edit-imgs-${postId}`);
+  const idx = container.children.length;
+  const row = document.createElement('div');
+  row.className = 'img-row';
+  row.innerHTML = `
+    <input type="text" class="img-path-input" value="${value}" placeholder="/home/ec2-user/..." />
+    <button class="btn btn-del-img" onclick="removeImgField(this, '${postId}')" ${total <= 1 && idx === 0 ? 'disabled' : ''}>🗑</button>
+  `;
+  container.appendChild(row);
+  updateDelBtns(postId);
+}
+
+function addImgField(postId) {
+  appendImgField(postId, '', 99);
+}
+
+function removeImgField(btn, postId) {
+  const container = document.getElementById(`edit-imgs-${postId}`);
+  if (container.children.length <= 1) return; // 最後の1枚は消せない
+  btn.closest('.img-row').remove();
+  updateDelBtns(postId);
+}
+
+function updateDelBtns(postId) {
+  const container = document.getElementById(`edit-imgs-${postId}`);
+  const btns = container.querySelectorAll('.btn-del-img');
+  btns.forEach(b => b.disabled = btns.length <= 1);
 }
 
 async function saveEdit(id, stage) {
   const caption = document.getElementById(`edit-cap-${id}`).value;
-  const imgsRaw = document.getElementById(`edit-imgs-${id}`).value;
-  const images = imgsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const inputs = document.querySelectorAll(`#edit-imgs-${id} .img-path-input`);
+  const images = [...inputs].map(i => i.value.trim()).filter(Boolean);
+  if (images.length === 0) { toast('画像は最低1枚必要です'); return; }
   const res = await api('PUT', `/api/${stage}/${id}`, { caption, images });
   if (res.ok) {
     toast('保存しました');

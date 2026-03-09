@@ -252,3 +252,13 @@ header .sub { color: var(--muted); font-size: .8rem; }
 .btn-ord { background: #1a3a5c; font-size: 12px; padding: 6px 8px; }
 .reorder-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
 .posted-meta { font-size: 11px; color: #aaa; }
+
+.img-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.img-path-input {
+  flex: 1; background: #1a1a2e; color: #eee;
+  border: 1px solid #444; border-radius: 6px;
+  padding: 7px 8px; font-size: 12px;
+}
+.btn-del-img { background: #5a2222; padding: 6px 10px; flex-shrink: 0; }
+.btn-del-img:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-add-img { background: #1a3a2a; font-size: 12px; margin: 4px 0 10px; width: 100%; }
