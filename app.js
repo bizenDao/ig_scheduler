@@ -111,17 +111,17 @@ function startEdit(id, stage) {
   const body = card.querySelector('.card-body');
   const caption = card.querySelector(`#cap-${id}`).textContent;
   const imgs = [...card.querySelectorAll('.card-images img')].map(img => {
-    const url = new URL(img.src);
-    return decodeURIComponent(url.searchParams.get('path') || '');
+    const u = new URL(img.src);
+    return decodeURIComponent(u.searchParams.get('path') || '');
   });
 
   body.innerHTML = `
-    <div class="edit-mode" id="edit-${id}">
+    <div class="edit-mode" id="edit-${id}" data-stage="${stage}">
       <label>キャプション</label>
       <textarea id="edit-cap-${id}" rows="6">${caption}</textarea>
       <label>画像</label>
-      <div id="edit-imgs-${id}"></div>
-      <button class="btn btn-add-img" onclick="addImgField('${id}')">＋ 画像を追加</button>
+      <div class="edit-img-grid" id="edit-imgs-${id}"></div>
+      <input type="file" id="file-input-${id}" accept="image/*" style="display:none" onchange="onFileSelected('${id}', this)">
       <div class="edit-actions">
         <button class="btn btn-ok" onclick="saveEdit('${id}', '${stage}')">💾 保存</button>
         <button class="btn btn-cancel" onclick="loadStage('${stage}')">❌ キャンセル</button>
@@ -129,47 +129,72 @@ function startEdit(id, stage) {
     </div>
   `;
 
-  // 画像フィールド初期化
-  const imgContainer = document.getElementById(`edit-imgs-${id}`);
-  imgs.forEach((p, i) => appendImgField(id, p, imgs.length));
-  // imgが空なら1行追加
-  if (imgs.length === 0) appendImgField(id, '', 0);
+  const grid = document.getElementById(`edit-imgs-${id}`);
+  imgs.forEach(p => addThumb(id, p));
+  addUploadBtn(id);
 }
 
-function appendImgField(postId, value, total) {
-  const container = document.getElementById(`edit-imgs-${postId}`);
-  const idx = container.children.length;
-  const row = document.createElement('div');
-  row.className = 'img-row';
-  row.innerHTML = `
-    <input type="text" class="img-path-input" value="${value}" placeholder="/home/ec2-user/..." />
-    <button class="btn btn-del-img" onclick="removeImgField(this, '${postId}')" ${total <= 1 && idx === 0 ? 'disabled' : ''}>🗑</button>
+function addThumb(postId, imgPath) {
+  const grid = document.getElementById(`edit-imgs-${postId}`);
+  const div = document.createElement('div');
+  div.className = 'edit-thumb';
+  div.dataset.path = imgPath;
+  div.innerHTML = `
+    <img src="${BASE}/api/img?path=${encodeURIComponent(imgPath)}" onerror="this.style.opacity=0.3">
+    <button class="del-thumb-btn" onclick="removeThumb(this, '${postId}')">❎</button>
   `;
-  container.appendChild(row);
-  updateDelBtns(postId);
+  // アップロードボタンの前に挿入
+  const uploadBtn = grid.querySelector('.upload-btn-wrap');
+  if (uploadBtn) grid.insertBefore(div, uploadBtn);
+  else grid.appendChild(div);
+  updateDelThumbBtns(postId);
 }
 
-function addImgField(postId) {
-  appendImgField(postId, '', 99);
+function addUploadBtn(postId) {
+  const grid = document.getElementById(`edit-imgs-${postId}`);
+  const div = document.createElement('div');
+  div.className = 'edit-thumb upload-btn-wrap';
+  div.innerHTML = `<button class="upload-btn" onclick="document.getElementById('file-input-${postId}').click()">＋</button>`;
+  grid.appendChild(div);
 }
 
-function removeImgField(btn, postId) {
-  const container = document.getElementById(`edit-imgs-${postId}`);
-  if (container.children.length <= 1) return; // 最後の1枚は消せない
-  btn.closest('.img-row').remove();
-  updateDelBtns(postId);
+function removeThumb(btn, postId) {
+  const grid = document.getElementById(`edit-imgs-${postId}`);
+  const thumbs = grid.querySelectorAll('.edit-thumb:not(.upload-btn-wrap)');
+  if (thumbs.length <= 1) return;
+  btn.closest('.edit-thumb').remove();
+  updateDelThumbBtns(postId);
 }
 
-function updateDelBtns(postId) {
-  const container = document.getElementById(`edit-imgs-${postId}`);
-  const btns = container.querySelectorAll('.btn-del-img');
-  btns.forEach(b => b.disabled = btns.length <= 1);
+function updateDelThumbBtns(postId) {
+  const grid = document.getElementById(`edit-imgs-${postId}`);
+  const thumbs = grid.querySelectorAll('.edit-thumb:not(.upload-btn-wrap)');
+  thumbs.forEach(t => {
+    t.querySelector('.del-thumb-btn').disabled = thumbs.length <= 1;
+  });
+}
+
+async function onFileSelected(postId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  toast('アップロード中…');
+  const res = await fetch(`${BASE}/api/upload`, { method: 'POST', body: formData });
+  const data = await res.json();
+  if (data.path) {
+    addThumb(postId, data.path);
+    toast('アップロード完了！');
+  } else {
+    toast('アップロード失敗…');
+  }
+  input.value = '';
 }
 
 async function saveEdit(id, stage) {
   const caption = document.getElementById(`edit-cap-${id}`).value;
-  const inputs = document.querySelectorAll(`#edit-imgs-${id} .img-path-input`);
-  const images = [...inputs].map(i => i.value.trim()).filter(Boolean);
+  const thumbs = document.querySelectorAll(`#edit-imgs-${id} .edit-thumb:not(.upload-btn-wrap)`);
+  const images = [...thumbs].map(t => t.dataset.path).filter(Boolean);
   if (images.length === 0) { toast('画像は最低1枚必要です'); return; }
   const res = await api('PUT', `/api/${stage}/${id}`, { caption, images });
   if (res.ok) {

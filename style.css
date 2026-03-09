@@ -262,3 +262,32 @@ header .sub { color: var(--muted); font-size: .8rem; }
 .btn-del-img { background: #5a2222; padding: 6px 10px; flex-shrink: 0; }
 .btn-del-img:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-add-img { background: #1a3a2a; font-size: 12px; margin: 4px 0 10px; width: 100%; }
+
+/* 編集モード 画像グリッド */
+.edit-img-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+}
+.edit-thumb {
+  position: relative; width: 90px; height: 90px;
+  border-radius: 8px; overflow: hidden;
+  background: #1a1a2e; border: 1px solid #444;
+}
+.edit-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.del-thumb-btn {
+  position: absolute; top: 2px; left: 2px;
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; line-height: 1; padding: 0;
+  filter: drop-shadow(0 0 2px #000);
+}
+.del-thumb-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+.upload-btn-wrap {
+  display: flex; align-items: center; justify-content: center;
+  border: 2px dashed #555; background: transparent;
+}
+.upload-btn {
+  background: none; border: none; color: #aaa;
+  font-size: 32px; cursor: pointer; line-height: 1;
+}
+.upload-btn:hover { color: #fff; }

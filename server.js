@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const { exec } = require('child_process');
+const UPLOAD_DIR = '/home/ec2-user/projects/bizeny/images/ig_hosting';
 
 const PORT = 8801;
 const DATA_DIR = path.join(__dirname, 'data');
@@ -117,6 +118,45 @@ const server = http.createServer(async (req, res) => {
       if (err) console.error('system event error:', err);
     });
     return json(res, { ok: true });
+  }
+
+  // POST /api/upload — 画像アップロード（multipart/form-data）
+  if (method === 'POST' && pathname === '/api/upload') {
+    const ct = req.headers['content-type'] || '';
+    const boundary = ct.split('boundary=')[1];
+    if (!boundary) return json(res, { error: 'no boundary' }, 400);
+    const chunks = [];
+    req.on('data', c => chunks.push(c));
+    req.on('end', () => {
+      const buf = Buffer.concat(chunks);
+      const sep = Buffer.from('--' + boundary);
+      const parts = [];
+      let start = buf.indexOf(sep) + sep.length + 2;
+      while (start < buf.length) {
+        const end = buf.indexOf(sep, start);
+        if (end === -1) break;
+        parts.push(buf.slice(start, end - 2));
+        start = end + sep.length + 2;
+      }
+      for (const part of parts) {
+        const headerEnd = part.indexOf('\r\n\r\n');
+        if (headerEnd === -1) continue;
+        const headers = part.slice(0, headerEnd).toString();
+        const data = part.slice(headerEnd + 4);
+        const nameMatch = headers.match(/name="([^"]+)"/);
+        const fileMatch = headers.match(/filename="([^"]+)"/);
+        if (nameMatch && fileMatch) {
+          const ext = path.extname(fileMatch[1]).toLowerCase() || '.jpg';
+          const fname = `ig_${Date.now()}${ext}`;
+          const fpath = path.join(UPLOAD_DIR, fname);
+          fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+          fs.writeFileSync(fpath, data);
+          return json(res, { ok: true, path: fpath });
+        }
+      }
+      json(res, { error: 'no file' }, 400);
+    });
+    return;
   }
 
   // POST /api/reorder — schedule内の並び替え
