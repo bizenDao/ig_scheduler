@@ -95,21 +95,26 @@ header .sub { color: var(--muted); font-size: .8rem; }
 
 .card-images {
   display: flex;
-  gap: 2px;
+  gap: 6px;
   overflow-x: auto;
-  scrollbar-width: none;
+  padding: 8px;
   background: #000;
-  max-height: 200px;
+  scroll-snap-type: x mandatory;
 }
-.card-images::-webkit-scrollbar { display: none; }
+.card-images::-webkit-scrollbar { height: 3px; }
+.card-images::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 .card-images img {
-  height: 200px;
+  height: 180px;
   width: auto;
+  max-width: 80vw;
   flex-shrink: 0;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  border-radius: 4px;
+  scroll-snap-align: start;
+  background: #111;
 }
-.card-images.single img { width: 100%; object-fit: cover; }
+.card-images.single img { height: auto; max-height: 300px; width: 100%; object-fit: contain; }
 
 .card-body { padding: 12px; }
 
