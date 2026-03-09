@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 /home/ec2-user/scripts/ig_post_from_schedule.py
+python3 /home/ec2-user/projects/ig_scheduler/ig_post_from_schedule.py
