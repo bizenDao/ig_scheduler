@@ -236,3 +236,19 @@ header .sub { color: var(--muted); font-size: .8rem; }
   min-width: 52px;
 }
 .btn-ord:hover { background: #3a3a6a; color: #fff; }
+
+/* 編集モード */
+.edit-mode { padding: 4px 0; }
+.edit-mode label { display: block; font-size: 11px; color: #aaa; margin: 8px 0 4px; }
+.edit-mode textarea {
+  width: 100%; box-sizing: border-box;
+  background: #1a1a2e; color: #eee;
+  border: 1px solid #444; border-radius: 6px;
+  padding: 8px; font-size: 13px; line-height: 1.5; resize: vertical;
+}
+.edit-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-edit { background: #2a5298; }
+.btn-cancel { background: #555; }
+.btn-ord { background: #1a3a5c; font-size: 12px; padding: 6px 8px; }
+.reorder-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.posted-meta { font-size: 11px; color: #aaa; }
