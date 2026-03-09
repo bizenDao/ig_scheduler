@@ -141,7 +141,7 @@ function addThumb(postId, imgPath) {
   div.dataset.path = imgPath;
   div.innerHTML = `
     <img src="${BASE}/api/img?path=${encodeURIComponent(imgPath)}" onerror="this.style.opacity=0.3">
-    <button class="del-thumb-btn" onclick="removeThumb(this, '${postId}')">❎</button>
+    <button class="del-thumb-btn" onclick="removeThumb(this, '${postId}')">✕</button>
   `;
   // アップロードボタンの前に挿入
   const uploadBtn = grid.querySelector('.upload-btn-wrap');
@@ -162,6 +162,7 @@ function removeThumb(btn, postId) {
   const grid = document.getElementById(`edit-imgs-${postId}`);
   const thumbs = grid.querySelectorAll('.edit-thumb:not(.upload-btn-wrap)');
   if (thumbs.length <= 1) return;
+  if (!confirm('この画像を削除しますか？')) return;
   btn.closest('.edit-thumb').remove();
   updateDelThumbBtns(postId);
 }
@@ -177,17 +178,19 @@ function updateDelThumbBtns(postId) {
 async function onFileSelected(postId, input) {
   const file = input.files[0];
   if (!file) return;
-  const formData = new FormData();
-  formData.append('file', file);
   toast('アップロード中…');
-  const res = await fetch(`${BASE}/api/upload`, { method: 'POST', body: formData });
-  const data = await res.json();
-  if (data.path) {
-    addThumb(postId, data.path);
-    toast('アップロード完了！');
-  } else {
-    toast('アップロード失敗…');
-  }
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const res = await api('POST', '/api/upload', { filename: file.name, data: base64 });
+    if (res.path) {
+      addThumb(postId, res.path);
+      toast('アップロード完了！');
+    } else {
+      toast('アップロード失敗…');
+    }
+  };
+  reader.readAsDataURL(file);
   input.value = '';
 }
 
