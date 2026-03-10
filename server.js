@@ -106,8 +106,9 @@ const server = http.createServer(async (req, res) => {
   // GET /api/img?path=... — ローカル画像を配信（許可ディレクトリのみ）
   // GET /api/skills — スキル一覧
   if (method === 'GET' && pathname === '/api/skills') {
+    const EXCLUDE_SKILLS = ['nanobanana'];
     const dirs = fs.readdirSync(SKILLS_DIR).filter(d => {
-      return fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
+      return !EXCLUDE_SKILLS.includes(d) && fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
     });
     return json(res, dirs.map(d => {
       const mdPath = path.join(SKILLS_DIR, d, 'SKILL.md');
