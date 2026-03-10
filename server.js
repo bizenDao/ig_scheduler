@@ -106,16 +106,18 @@ const server = http.createServer(async (req, res) => {
   // GET /api/img?path=... — ローカル画像を配信（許可ディレクトリのみ）
   // GET /api/skills — スキル一覧
   if (method === 'GET' && pathname === '/api/skills') {
-    const EXCLUDE_SKILLS = ['nanobanana'];
     const dirs = fs.readdirSync(SKILLS_DIR).filter(d => {
-      return !EXCLUDE_SKILLS.includes(d) && fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
+      return fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'));
     });
-    return json(res, dirs.map(d => {
+    const igSkills = dirs.reduce((acc, d) => {
       const mdPath = path.join(SKILLS_DIR, d, 'SKILL.md');
-      const firstLine = fs.readFileSync(mdPath, 'utf8').split('\n')[0];
-      const title = firstLine.replace(/^#\s*SKILL:\s*/, '').trim();
-      return { name: d, title };
-    }));
+      const lines = fs.readFileSync(mdPath, 'utf8').split('\n');
+      const title = lines[0].replace(/^#\s*SKILL:\s*/, '').trim();
+      const tags = lines.find(l => l.startsWith('tags:'))?.replace('tags:', '').trim().split(/\s*,\s*/) || [];
+      if (tags.includes('ig')) acc.push({ name: d, title, tags });
+      return acc;
+    }, []);
+    return json(res, igSkills);
   }
 
   // GET /api/skills/:name — SKILL.md内容
@@ -144,8 +146,8 @@ const server = http.createServer(async (req, res) => {
 
   // GET /api/next-cron — 次回cron実行時刻（JST）
   if (method === 'GET' && pathname === '/api/next-cron') {
-    // 1日3回: JST 8:05 / 12:00 / 18:00
-    const slots = [{ h: 8, m: 5 }, { h: 12, m: 0 }, { h: 18, m: 0 }];
+    // 1日2回: JST 12:05 / 19:25
+    const slots = [{ h: 12, m: 5 }, { h: 19, m: 25 }];
     const now = new Date();
     const jstOffset = 9 * 60;
     const jstNow = new Date(now.getTime() + jstOffset * 60000);

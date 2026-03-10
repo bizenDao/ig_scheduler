@@ -8,9 +8,10 @@ LOG = Path.home() / 'logs/ig_scheduler_cron.log'
 
 # タイプ定義（IDプレフィックス → 表示名）
 TYPES = {
-    '4koma':     '4コマ漫画',
-    'bizenlife': '備前焼のある食卓',
-    'friends':   '友人エピソード',
+    '4koma':       '4コマ漫画',
+    'bizenlife':   '備前焼のある食卓',
+    'akiko_diary': '彰子の日記',
+    'nft_contest': '備前焼振興活動SBT',
 }
 WARN_THRESHOLD = 3  # 予定がこの件数以下で警告
 
