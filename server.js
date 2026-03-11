@@ -131,7 +131,7 @@ const server = http.createServer(async (req, res) => {
 
   if (method === 'GET' && pathname === '/api/img') {
     const imgPath = parsed.query.path || '';
-    const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/projects/ig_scheduler', '/home/ec2-user/projects/bizeny/images/ig_hosting'];
+    const allowed = ['/home/ec2-user/workspace', '/home/ec2-user/generates', '/home/ec2-user/assets', '/home/ec2-user/projects/ig_scheduler', '/home/ec2-user/projects/bizeny/images/ig_hosting'];
     if (!allowed.some(d => imgPath.startsWith(d))) return json(res, { error: 'forbidden' }, 403);
     const ext = path.extname(imgPath).toLowerCase();
     const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif' };
@@ -164,7 +164,10 @@ const server = http.createServer(async (req, res) => {
   if (method === 'GET' && pathname.match(/^\/api\/(\w+)$/)) {
     const stage = pathname.split('/')[2];
     if (!STAGES.includes(stage)) return json(res, { error: 'invalid stage' }, 400);
-    return json(res, readStage(stage));
+    const data = readStage(stage);
+    // posted は新しいものが上に来るよう逆順で返す
+    if (stage === 'posted') data.posts = [...data.posts].reverse();
+    return json(res, data);
   }
 
   // POST /api/request_mod — 修正依頼を彰子にsystem eventで転送

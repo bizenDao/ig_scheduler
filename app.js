@@ -47,7 +47,7 @@ function renderCard(post, stage) {
   const imgs = (post.images || []);
   const imgHtml = imgs.length > 0
     ? `<div class="card-images ${imgs.length === 1 ? 'single' : ''}">
-        ${imgs.map(src => `<img src="${BASE}/api/img?path=${encodeURIComponent(src)}" loading="lazy" onerror="this.style.display='none'">`).join('')}
+        ${imgs.map((src, i) => `<img src="${BASE}/api/img?path=${encodeURIComponent(src)}" loading="lazy" onerror="this.style.display='none'" data-imgs='${JSON.stringify(imgs).replace(/'/g, "&#39;")}' data-idx="${i}" onclick="openImgModalFromEl(this)">`).join('')}
        </div>`
     : '';
 
@@ -295,4 +295,46 @@ function closeSkillModal() {
 
 function closeSkills(e) {
   if (e.target.id === 'skill-modal') closeSkillModal();
+}
+
+// ── 画像拡大モーダル ──────────────────────────
+let _imgList = [], _imgIdx = 0;
+
+function openImgModalFromEl(el) {
+  const imgs = JSON.parse(el.dataset.imgs);
+  const idx = parseInt(el.dataset.idx, 10);
+  openImgModal(imgs, idx);
+}
+
+function openImgModal(imgs, idx) {
+  _imgList = imgs;
+  _imgIdx = idx;
+  _renderImgModal();
+  document.getElementById('img-modal').style.display = 'flex';
+  document.addEventListener('keydown', _imgModalKey);
+}
+
+function closeImgModal() {
+  document.getElementById('img-modal').style.display = 'none';
+  document.removeEventListener('keydown', _imgModalKey);
+}
+
+function imgModalNav(dir) {
+  _imgIdx = (_imgIdx + dir + _imgList.length) % _imgList.length;
+  _renderImgModal();
+}
+
+function _renderImgModal() {
+  const src = `${BASE}/api/img?path=${encodeURIComponent(_imgList[_imgIdx])}`;
+  document.getElementById('img-modal-img').src = src;
+  const nav = document.querySelectorAll('.img-modal-nav');
+  nav.forEach(b => b.style.display = _imgList.length > 1 ? '' : 'none');
+  document.getElementById('img-modal-counter').textContent =
+    _imgList.length > 1 ? `${_imgIdx + 1} / ${_imgList.length}` : '';
+}
+
+function _imgModalKey(e) {
+  if (e.key === 'Escape') closeImgModal();
+  if (e.key === 'ArrowRight') imgModalNav(1);
+  if (e.key === 'ArrowLeft') imgModalNav(-1);
 }

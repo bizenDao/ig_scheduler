@@ -356,3 +356,50 @@ header .sub { color: var(--muted); font-size: .8rem; }
 #skill-md h1,#skill-md h2,#skill-md h3 { color: #a0c4ff; margin: 12px 0 6px; }
 #skill-md code { background: #0f3460; padding: 2px 6px; border-radius: 4px; }
 #skill-md ul { padding-left: 20px; }
+
+/* ── 画像拡大モーダル ─────────────────────── */
+.img-modal-box {
+  position: relative;
+  background: #111;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+}
+.img-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  line-height: 1;
+}
+.img-modal-close:hover { background: rgba(255,255,255,0.25); }
+.img-modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  width: 40px;
+  height: 60px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+.img-modal-nav:hover { background: rgba(255,255,255,0.3); }
+.img-modal-prev { left: 8px; }
+.img-modal-next { right: 8px; }
+.card-images img { cursor: zoom-in; }
